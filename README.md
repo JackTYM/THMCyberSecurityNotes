@@ -44,6 +44,15 @@ gobuster
   -w WORDLIST
 ```
 
+## Netcat
+```bash
+  nc
+    -l # Listen Mode
+    -n # No DNS Lookup
+    -v # Verbose
+    -p PORT
+```
+
 # Discovery Methods
 
 ## Manual
