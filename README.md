@@ -248,3 +248,11 @@ Vulnerability - `param=../../../etc/passwd`
 
 ### Notes
 - If adding parameter to a command, use `|` or `;` to create a new command
+
+## SQLi
+SQL Injection - Exploits that allow users to modify or read from an SQL Database
+
+### Vulnerabilities and Exploits
+- `SELECT * from blog where id=param and private=0 LIMIT 1;`
+    - Exploit - `https://example.com/page?param=1;--`
+    - Command - `SELECT * from blog where id=1;-- and private=0 LIMIT 1;`
